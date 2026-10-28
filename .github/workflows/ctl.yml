@@ -1,0 +1,9 @@
+name: ctl
+on: workflow_dispatch
+permissions:
+  contents: read
+jobs:
+  c:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "ACTIONS-AVAILABLE marker"
