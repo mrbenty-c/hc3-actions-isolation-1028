@@ -1,0 +1,24 @@
+name: pub
+on: workflow_dispatch
+permissions:
+  contents: read
+  packages: write
+jobs:
+  p:
+    runs-on: ubuntu-latest
+    steps:
+      - name: publish a user-scoped npm package using only GITHUB_TOKEN
+        run: |
+          mkdir -p p && cd p
+          cat > package.json <<EOF
+          {
+            "name": "@mrbenty-c/hc3-tokencap-1028",
+            "version": "1.0.${{ github.run_number }}",
+            "description": "hc3 credential capability probe",
+            "repository": { "type": "git", "url": "git+https://github.com/mrbenty-c/hc3-actions-isolation-1028.git" }
+          }
+          EOF
+          echo '@mrbenty-c:registry=https://npm.pkg.github.com' > .npmrc
+          echo '//npm.pkg.github.com/:_authToken=${{ secrets.GITHUB_TOKEN }}' >> .npmrc
+          echo "=== npm publish with GITHUB_TOKEN (packages:write) ==="
+          npm publish 2>&1 | tail -25
