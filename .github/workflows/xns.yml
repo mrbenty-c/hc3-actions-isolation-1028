@@ -1,0 +1,33 @@
+name: xns
+on: workflow_dispatch
+permissions:
+  contents: read
+  packages: write
+jobs:
+  x:
+    runs-on: ubuntu-latest
+    steps:
+      - name: CROSS-NAMESPACE PROBE - publish into @benty-org from a mrbenty-c repo
+        run: |
+          mkdir -p p && cd p
+          cat > package.json <<EOF
+          { "name": "@benty-org/hc3-xns-1028", "version": "1.0.${{ github.run_number }}",
+            "description": "hc3 cross-namespace authorization probe" }
+          EOF
+          echo '@benty-org:registry=https://npm.pkg.github.com' > .npmrc
+          echo '//npm.pkg.github.com/:_authToken=${{ secrets.GITHUB_TOKEN }}' >> .npmrc
+          echo "=== token identity ==="
+          echo "repo=${{ github.repository }} actor=${{ github.actor }}"
+          echo "=== attempting cross-namespace publish into @benty-org ==="
+          npm publish; echo "NPM_EXIT=$?"
+      - name: CONTROL - same token into its OWN namespace must succeed
+        if: always()
+        run: |
+          mkdir -p q && cd q
+          cat > package.json <<EOF
+          { "name": "@mrbenty-c/hc3-xns-control-1028", "version": "1.0.${{ github.run_number }}",
+            "description": "own-namespace control" }
+          EOF
+          echo '@mrbenty-c:registry=https://npm.pkg.github.com' > .npmrc
+          echo '//npm.pkg.github.com/:_authToken=${{ secrets.GITHUB_TOKEN }}' >> .npmrc
+          npm publish; echo "CONTROL_EXIT=$?"
